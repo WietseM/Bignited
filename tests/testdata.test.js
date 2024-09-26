@@ -75,14 +75,18 @@ test('Geen bedrag ingevuld geeft 1 Iban', async ({ page }) => {
 
 test('Negatief aantal wordt omgezet in positief aantal', async ({ page }) => {
 
-    await page.locator("input[id='/iban-1']").fill("-3");
+    const minValue = await page.locator("input[id='/iban-1']").getAttribute('min');
+
+    expect(minValue).toBe("0");
+
+    await page.locator("input[id='/iban-1']").fill((parseInt(minValue)-10).toString());
 
     await page.locator("button[id='/iban-generate-button']").click();
 
     const ibanResult = await page.locator("pre[id='iban-text']").innerText();
     const ibanResultArray = ibanResult.match(/.{1,27}/g);
 
-    expect(ibanResultArray.length).toBe(3);
+    expect(ibanResultArray.length).toBe(parseInt(minValue)+10);
 
     const regex = new RegExp('^BE\\d{14}$');
     for (const result of ibanResultArray){
@@ -92,14 +96,16 @@ test('Negatief aantal wordt omgezet in positief aantal', async ({ page }) => {
 
 test('Te groot aantal geeft error message en limiteert tot max aantal', async ({ page }) => {
 
-    await page.locator("input[id='/iban-1']").fill("110");
+    const maxValue = await page.locator("input[id='/iban-1']").getAttribute('max');
+
+    await page.locator("input[id='/iban-1']").fill((parseInt(maxValue)+5).toString());
 
     await page.locator("button[id='/iban-generate-button']").click();
 
     const ibanResult = await page.locator("pre[id='iban-text']").innerText();
     const ibanResultArray = ibanResult.match(/.{1,27}/g);
 
-    expect(ibanResultArray.length).toBe(100);
+    expect(ibanResultArray.length).toBe(parseInt(maxValue));
     const regex = new RegExp('^BE\\d{14}$');
     for (const result of ibanResultArray){
         expect(result).toMatch(regex);

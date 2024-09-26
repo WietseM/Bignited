@@ -101,14 +101,18 @@ test('Alles juist ingevuld met gender not known en birthdate not known geeft gew
 
 test('Negatief aantal wordt omgezet in positief aantal', async ({ page }) => {
 
-    await page.locator("input[id='/bis-3']").fill("-5");
+    const minValue = await page.locator("input[id='/bis-3']").getAttribute('min');
+
+    expect(minValue).toBe("0");
+
+    await page.locator("input[id='/bis-3']").fill((parseInt(minValue)-10).toString());
 
     await page.locator("button[id='/bis-generate-button']").click();
 
     const bisResult = await page.locator("pre[id='bis-text']").innerText();
     const bisResultArray = bisResult.match(/.{1,27}/g);
 
-    expect(bisResultArray.length).toBe(5);
+    expect(bisResultArray.length).toBe(parseInt(minValue)+10);
 
     const regex = new RegExp('^\\d{2}(4\\d|5[0-2])\\d{7}$');
     for (const result of bisResultArray){
@@ -117,14 +121,17 @@ test('Negatief aantal wordt omgezet in positief aantal', async ({ page }) => {
 });
 
 test('Te groot aantal geeft error message en limiteert tot max aantal', async ({ page }) => {
-    await page.locator("input[id='/bis-3']").fill("120");
+
+    const maxValue = await page.locator("input[id='/bis-3']").getAttribute('max');
+
+    await page.locator("input[id='/bis-3']").fill((parseInt(maxValue)+5).toString());
 
     await page.locator("button[id='/bis-generate-button']").click();
 
     const bisResult = await page.locator("pre[id='bis-text']").innerText();
     const bisResultArray = bisResult.match(/.{1,27}/g);
 
-    expect(bisResultArray.length).toBe(100);
+    expect(bisResultArray.length).toBe(parseInt(maxValue));
 
     const regex = new RegExp('^\\d{2}(4\\d|5[0-2])\\d{7}$');
     for (const result of bisResultArray){
@@ -171,4 +178,3 @@ test('Test op geldigheid bis-nummers', async ({ page }) => {
     const difference = bisValidationMap.size === correctValidationArray.length;
     expect(difference).toBeFalsy();
 });
-
