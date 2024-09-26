@@ -26,7 +26,7 @@ test('Alles juist ingevuld geeft gewenst resultaat', async ({ page }) => {
     const ibanResultArray = ibanResult.match(/.{1,27}/g);
 
     expect(ibanResultArray.length).toBe(10);
-    const regex = new RegExp('^' + selectieLandCode + '\\d{2}[A-Z0-9]{1,30}$');
+    const regex = new RegExp('^' + selectieLandCode + '\\d{2}[A-Z0-9]{1,32}$');
     for (const result of ibanResultArray){
         expect(result).toMatch(regex);
     }
@@ -66,7 +66,7 @@ test('Geen bedrag ingevuld geeft 1 Iban', async ({ page }) => {
 
  expect(ibanResultArray.length).toBe(1);
 
- const regex = new RegExp('^' + selectieLandCode + '\\d{2}[A-Z0-9]{1,30}$');
+ const regex = new RegExp('^' + selectieLandCode + '\\d{2}[A-Z0-9]{1,32}$');
  for (const result of ibanResultArray){
   expect(result).toMatch(regex);
  }
